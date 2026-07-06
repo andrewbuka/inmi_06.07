@@ -35,7 +35,7 @@
 					<img src="http://inmi/wp-content/uploads/2026/05/antoils-Photoroom-1.png" alt="img">
 					
 				</div>
-				<div class="col-12 col-md-3 single-shop-left my-single-shop-left">
+				<div class="col-12 col-md-3 single-shop-left my-single-shop-left single-fiz-product" data-product-id="fiz-6">
 					<h2 class="title my-title"><?php the_title(); ?></h2>
 					<label class="my-label"><?php the_field('description'); ?></label>
 
