@@ -8,6 +8,20 @@ const basketFull = document.querySelector('.tttt')
 const subtotalSum = document.querySelector('.subtotal-sum')
 const totalSum = document.querySelector('.total-sum')
 
+const formatBasketSum = value => Number(value) || 0
+
+const updateProductTotal = prod => {
+    const prodId = prod.getAttribute('id')
+    const product = forAsyncBasket.find(item => item.id === prodId)
+    const totalCell = prod.querySelector('.total')
+
+    if (!product || !totalCell) {
+        return
+    }
+
+    totalCell.textContent = `${formatBasketSum(+product.price * +product.count)} BYN`
+}
+
 let forAsyncBasket = [];
 let isEdit = false;
 
@@ -37,8 +51,8 @@ const setCartCountBasket = (products) => {
     })
 
     prodCountBasket.textContent = count
-    subtotalSum.textContent = sum
-    totalSum.textContent = sum
+    subtotalSum.textContent = formatBasketSum(sum)
+    totalSum.textContent = formatBasketSum(sum)
 
     if(!products.length) {
         emptyBasket.classList.remove('none')
@@ -67,8 +81,8 @@ const setBasket = (products) => {
         const priceBox = DomHelper.createPriceBox([price])
 
         // total
-        const totalSum = +prod.price*+prod.count
-        const total = DomHelper.createTotal(`${totalSum} BYN`)
+        const productTotalSum = formatBasketSum(+prod.price * +prod.count)
+        const total = DomHelper.createTotal(`${productTotalSum} BYN`)
 
 
 
@@ -103,6 +117,7 @@ const onMinus = (event) => {
 
         localStorage.setItem('order', JSON.stringify(forAsyncBasket));
         setCartCountBasket(forAsyncBasket)
+        updateProductTotal(prod)
     }
 
 }
@@ -126,6 +141,7 @@ const onPlus = (event) => {
 
         localStorage.setItem('order', JSON.stringify(forAsyncBasket));
         setCartCountBasket(forAsyncBasket)
+        updateProductTotal(prod)
 
 }
 const onDeleteProd = (event) => {
