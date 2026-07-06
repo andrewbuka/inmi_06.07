@@ -192,3 +192,69 @@ getData();
 
 
 
+
+const shippingMethodInputs = document.querySelectorAll('input[name="shipping_method"]')
+const shippingAddressBlock = document.querySelector('#simplecheckout_shipping_address')
+const shippingAddressInput = document.querySelector('#shipping_address_address_1')
+const shippingAddressRule = document.querySelector('[data-for="shipping_address_address_1"][data-rule="byLength"]')
+const europochtaShippingValue = 'revship2.revship2'
+const checkoutConfirmButton = document.querySelector('#simplecheckout_button_confirm')
+
+const toggleShippingAddress = () => {
+    if (!shippingAddressBlock || !shippingAddressInput) {
+        return
+    }
+
+    const selectedShippingMethod = document.querySelector('input[name="shipping_method"]:checked')
+    const isEuropochtaDelivery = selectedShippingMethod && selectedShippingMethod.value === europochtaShippingValue
+
+    shippingAddressBlock.classList.toggle('none', !isEuropochtaDelivery)
+    shippingAddressInput.required = isEuropochtaDelivery
+    shippingAddressInput.disabled = !isEuropochtaDelivery
+    shippingAddressInput.setAttribute('aria-required', String(isEuropochtaDelivery))
+
+    if (shippingAddressRule) {
+        shippingAddressRule.dataset.required = String(isEuropochtaDelivery)
+    }
+
+    if (!isEuropochtaDelivery) {
+        shippingAddressInput.value = ''
+    }
+
+    if (shippingAddressRule) {
+        shippingAddressRule.style.display = 'none'
+    }
+}
+
+shippingMethodInputs.forEach(input => {
+    input.addEventListener('change', toggleShippingAddress)
+})
+
+toggleShippingAddress()
+
+const validateShippingAddress = (event) => {
+    if (!shippingAddressInput || shippingAddressInput.disabled || shippingAddressInput.value.trim().length >= 3) {
+        return
+    }
+
+    event.preventDefault()
+    event.stopImmediatePropagation()
+
+    if (shippingAddressRule) {
+        shippingAddressRule.style.display = 'block'
+    }
+
+    shippingAddressInput.focus()
+}
+
+if (checkoutConfirmButton) {
+    checkoutConfirmButton.addEventListener('click', validateShippingAddress)
+}
+
+if (shippingAddressInput) {
+    shippingAddressInput.addEventListener('input', () => {
+        if (shippingAddressRule && shippingAddressInput.value.trim().length >= 3) {
+            shippingAddressRule.style.display = 'none'
+        }
+    })
+}
