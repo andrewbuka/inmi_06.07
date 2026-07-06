@@ -2,19 +2,70 @@ const btnBuy = document.querySelectorAll('.btn-buy')
 const refreshProd = document.querySelectorAll('.refresh-prod')
 const toCart = document.querySelectorAll('.btn-to-card')
 const prodCount = document.querySelector('.count-prod')
+const singleFizProduct = document.querySelector('.single-fiz-product')
 
 const card = document.querySelectorAll('.prod-container')
 
 
 let forAsync = []
 
+const getSavedOrder = () => {
+    try {
+        return JSON.parse(localStorage.getItem('order')) || []
+    } catch (error) {
+        return []
+    }
+}
+
+const normalizeCount = (value) => {
+    const count = parseInt(value, 10)
+
+    return count > 0 ? count : 1
+}
+
+const addProductToOrder = (productId, count) => {
+    const productInfo = fizProductArray.find((arrayItem) => productId === arrayItem.id)
+
+    if (!productInfo) {
+        return null
+    }
+
+    let update = false
+    const normalizedCount = normalizeCount(count)
+    const productForOrder = {...productInfo, count: normalizedCount}
+
+    if (forAsync.length !== 0) {
+        forAsync = forAsync.map(item => {
+            if(productForOrder.id === item.id) {
+                update = true
+
+                return {...item, count: productForOrder.count + item.count}
+            }
+
+            return item
+        })
+
+        if (!update) {
+            forAsync.push(productForOrder)
+        }
+    } else {
+        forAsync.push(productForOrder)
+    }
+
+    localStorage.setItem("order", JSON.stringify(forAsync));
+    setCartCount(forAsync);
+
+    return productForOrder
+}
+
 const setFeatures = () => {
-    const data = JSON.parse(localStorage.getItem('order'))
-    if(data ) {
+    const data = getSavedOrder()
+    if(data.length ) {
         forAsync = data;
         setCartCount(forAsync);
 
         setCard(forAsync)
+        setSingleProductState(forAsync)
 
     }   
 
@@ -55,52 +106,19 @@ const onRefresh = () => {
 const onToCart = () => {
     toCart.forEach(btn => {
         btn.addEventListener('click', (event) => {
-            let prodIteminfo;
             const product = event.target.closest('.product-item')
             const productId = product.getAttribute('id');
-         
-            const count = +product.querySelector('.add-to-card-input').value
+            const countInput = product.querySelector('.add-to-card-input')
+            const count = normalizeCount(countInput.value)
 
-            let update = false
-           
+            const productForOrder = addProductToOrder(productId, count)
 
-            fizProductArray.forEach((arrayItem) => {
-                if(productId === arrayItem.id) {
-                    prodIteminfo = {...arrayItem, count}
+            if (!productForOrder) {
+                return
+            }
 
-                    if(forAsync.length !== 0) {
-                        forAsync = forAsync.map(item => {
-                            if(prodIteminfo.id === item.id) {
-                               
-                                 item = {...item, count: prodIteminfo.count + item.count}
-                                 update = true;
-                            } 
-                            return item
-                        })
-
-                        if (!update) {
-                            forAsync.push(prodIteminfo)
-                        }
-                    } else {
-                        forAsync.push(prodIteminfo)
-                    }
-                }
-                
-                
-            })
-
-
-            console.log('forAsync', forAsync)
-
-            localStorage.setItem("order", JSON.stringify(forAsync));
-
-            setCartCount(forAsync);
-
-    
-          
             const addToCardBox = product.querySelector('.add-to-card-box');
             const buyBtn = product.querySelector('.btn-buy');
-            const countInput = product.querySelector('.add-to-card-input');
             const inBasketP = product.querySelector('.in-basket-p')
             const inBasketSpan = product.querySelector('.in-basket-span')
             
@@ -108,7 +126,7 @@ const onToCart = () => {
             addToCardBox.classList.add('none')
             buyBtn.classList.add('none')
             inBasketP.classList.remove('none')
-            inBasketSpan.textContent = countInput.value
+            inBasketSpan.textContent = count
 
             countInput.value = 1
             
@@ -117,6 +135,10 @@ const onToCart = () => {
 }
 
 const setCartCount = (products) => {
+    if (!prodCount) {
+        return
+    }
+
     let count = 0;
     products.forEach(prod => {
         count = count + prod.count
@@ -145,9 +167,69 @@ const setCard = (order) => {
     })
 }
 
+const getSingleProductBasketText = () => {
+    let inBasketText = singleFizProduct.querySelector('.in-basket-p')
+
+    if (!inBasketText) {
+        inBasketText = document.createElement('span')
+        inBasketText.classList.add('in-basket-p', 'none')
+        inBasketText.innerHTML = 'В корзине <span class="in-basket-span">1</span> шт.'
+        singleFizProduct.querySelector('.btn-wishlist').insertAdjacentElement('afterend', inBasketText)
+    }
+
+    return inBasketText
+}
+
+const setSingleProductState = (order) => {
+    if (!singleFizProduct) {
+        return
+    }
+
+    const productId = singleFizProduct.dataset.productId
+    const orderItem = order.find(item => item.id === productId)
+
+    if (orderItem) {
+        const inBasketText = getSingleProductBasketText()
+        inBasketText.querySelector('.in-basket-span').textContent = orderItem.count
+        inBasketText.classList.remove('none')
+    }
+}
+
+const onSingleProductToCart = () => {
+    if (!singleFizProduct) {
+        return
+    }
+
+    const button = singleFizProduct.querySelector('.btn-wishlist')
+    const countInput = singleFizProduct.querySelector('.input-insingle-prod')
+
+    if (!button || !countInput) {
+        return
+    }
+
+    button.addEventListener('click', (event) => {
+        event.preventDefault()
+
+        const count = normalizeCount(countInput.value)
+        const productForOrder = addProductToOrder(singleFizProduct.dataset.productId, count)
+
+        if (!productForOrder) {
+            return
+        }
+
+        const inBasketText = getSingleProductBasketText()
+        const orderItem = forAsync.find(item => item.id === productForOrder.id)
+
+        inBasketText.querySelector('.in-basket-span').textContent = orderItem ? orderItem.count : count
+        inBasketText.classList.remove('none')
+        countInput.value = 1
+    })
+}
+
 
 
 setFeatures();
 onBuyClick();
 onRefresh();
 onToCart();
+onSingleProductToCart();
