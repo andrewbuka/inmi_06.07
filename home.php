@@ -128,6 +128,9 @@
 											</a>
 										</h6>
 										<div class="btn btn-buy"><span>Купить</span></div>
+										<div class="fiz-calc-box">
+											<button type="button" class="btn btn-form fiz-calc-open"><span>Калькулятор расхода</span></button>
+										</div>
 
 										<span class="in-basket-p none">В корзине <span  class="in-basket-span">1</span> шт.</span>
 
