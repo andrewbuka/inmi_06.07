@@ -258,3 +258,236 @@ if (shippingAddressInput) {
         }
     })
 }
+
+const checkoutSummaryOverlay = document.querySelector('#checkout_summary_overlay')
+const checkoutSummaryClose = document.querySelector('#checkout_summary_close')
+const checkoutSummaryContent = document.querySelector('#checkout_summary_content')
+const checkoutSummarySubmit = document.querySelector('#checkout_summary_submit')
+const requiredCheckoutFields = [
+    {
+        input: document.querySelector('#customer_firstname'),
+        validate: value => value.trim().length >= 1 && value.trim().length <= 32,
+        message: 'Имя должно быть от 1 до 32 символов!'
+    },
+    {
+        input: document.querySelector('#customer_email'),
+        validate: value => /^[^@ \t\r\n]+@[^@ \t\r\n]+\.[^@ \t\r\n]+$/.test(value.trim()),
+        message: 'Некорректный адрес электронной почты!'
+    },
+    {
+        input: document.querySelector('#customer_telephone'),
+        validate: value => value.trim().length >= 3 && value.trim().length <= 32,
+        message: 'Телефон должен быть от 3 до 32 символов!'
+    }
+]
+
+const escapeCheckoutHtml = value => String(value || '').replace(/[&<>'"]/g, char => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    "'": '&#39;',
+    '"': '&quot;'
+}[char]))
+
+const setCheckoutFieldError = (input, message, isVisible) => {
+    if (!input) {
+        return
+    }
+
+    input.classList.toggle('is-invalid', isVisible)
+    const ruleGroup = document.querySelector(`.simplecheckout-rule-group[data-for="${input.id}"]`)
+    const rule = ruleGroup ? ruleGroup.querySelector('.simplecheckout-rule') : null
+
+    if (rule) {
+        rule.textContent = message
+        rule.style.display = isVisible ? 'block' : 'none'
+    }
+}
+
+const getCheckedLabel = name => {
+    const input = document.querySelector(`input[name="${name}"]:checked`)
+
+    if (!input) {
+        return ''
+    }
+
+    const label = document.querySelector(`label[for="${input.id}"]`)
+    return label ? label.textContent.trim() : input.value
+}
+
+const getCheckoutData = () => {
+    const selectedShippingMethod = document.querySelector('input[name="shipping_method"]:checked')
+    const isDelivery = selectedShippingMethod && selectedShippingMethod.value === europochtaShippingValue
+
+    return {
+        firstname: document.querySelector('#customer_firstname')?.value.trim() || '',
+        email: document.querySelector('#customer_email')?.value.trim() || '',
+        telephone: document.querySelector('#customer_telephone')?.value.trim() || '',
+        shipping: getCheckedLabel('shipping_method'),
+        payment: getCheckedLabel('payment_method'),
+        address: isDelivery ? (shippingAddressInput?.value.trim() || '') : '',
+        comment: document.querySelector('#comment')?.value.trim() || '',
+        total: totalSum?.textContent.trim() || '0',
+        products: forAsyncBasket
+    }
+}
+
+const validateCheckoutForm = () => {
+    let firstInvalidInput = null
+    let isValid = true
+
+    requiredCheckoutFields.forEach(field => {
+        if (!field.input) {
+            return
+        }
+
+        const fieldIsValid = field.validate(field.input.value)
+        setCheckoutFieldError(field.input, field.message, !fieldIsValid)
+
+        if (!fieldIsValid) {
+            isValid = false
+            firstInvalidInput = firstInvalidInput || field.input
+        }
+    })
+
+    const selectedShippingMethod = document.querySelector('input[name="shipping_method"]:checked')
+    const shippingWarning = document.querySelector('#simplecheckout_shipping .simplecheckout-warning-block')
+    const hasShippingMethod = Boolean(selectedShippingMethod)
+
+    if (shippingWarning) {
+        shippingWarning.style.display = hasShippingMethod ? 'none' : 'block'
+    }
+
+    if (!hasShippingMethod) {
+        isValid = false
+    }
+
+    const selectedPaymentMethod = document.querySelector('input[name="payment_method"]:checked')
+    const paymentWarning = document.querySelector('#simplecheckout_payment .simplecheckout-warning-block')
+    const hasPaymentMethod = Boolean(selectedPaymentMethod)
+
+    if (paymentWarning) {
+        paymentWarning.style.display = hasPaymentMethod ? 'none' : 'block'
+    }
+
+    if (!hasPaymentMethod) {
+        isValid = false
+    }
+
+    if (shippingAddressInput && !shippingAddressInput.disabled) {
+        const addressIsValid = shippingAddressInput.value.trim().length >= 3
+        setCheckoutFieldError(shippingAddressInput, 'Адрес должен быть от 3 до 128 символов!', !addressIsValid)
+
+        if (!addressIsValid) {
+            isValid = false
+            firstInvalidInput = firstInvalidInput || shippingAddressInput
+        }
+    }
+
+    if (!forAsyncBasket.length) {
+        isValid = false
+    }
+
+    if (!isValid && firstInvalidInput) {
+        firstInvalidInput.focus()
+    }
+
+    return isValid
+}
+
+const renderCheckoutSummary = data => {
+    const products = data.products.map(product => `
+        <li>
+            <span>${escapeCheckoutHtml(product.title)} × ${escapeCheckoutHtml(product.count)}</span>
+            <strong>${escapeCheckoutHtml(+product.price * +product.count)} руб.</strong>
+        </li>
+    `).join('')
+
+    checkoutSummaryContent.innerHTML = `
+        <div class="checkout-summary-section">
+            <h4>Покупатель</h4>
+            <ul class="checkout-summary-list">
+                <li><span>ФИО</span><strong>${escapeCheckoutHtml(data.firstname)}</strong></li>
+                <li><span>Email</span><strong>${escapeCheckoutHtml(data.email)}</strong></li>
+                <li><span>Телефон</span><strong>${escapeCheckoutHtml(data.telephone)}</strong></li>
+            </ul>
+        </div>
+        <div class="checkout-summary-section">
+            <h4>Доставка и оплата</h4>
+            <ul class="checkout-summary-list">
+                <li><span>Доставка</span><strong>${escapeCheckoutHtml(data.shipping)}</strong></li>
+                ${data.address ? `<li><span>Адрес</span><strong>${escapeCheckoutHtml(data.address)}</strong></li>` : ''}
+                <li><span>Оплата</span><strong>${escapeCheckoutHtml(data.payment)}</strong></li>
+                ${data.comment ? `<li><span>Комментарий</span><strong>${escapeCheckoutHtml(data.comment)}</strong></li>` : ''}
+            </ul>
+        </div>
+        <div class="checkout-summary-section">
+            <h4>Товары</h4>
+            <ul class="checkout-summary-products">${products}</ul>
+            <div class="checkout-summary-total"><span>Всего</span><strong>${escapeCheckoutHtml(data.total)} руб.</strong></div>
+        </div>
+    `
+}
+
+const openCheckoutSummary = () => {
+    if (!checkoutSummaryOverlay) {
+        return
+    }
+
+    renderCheckoutSummary(getCheckoutData())
+    checkoutSummaryOverlay.classList.add('is-active')
+    checkoutSummaryOverlay.setAttribute('aria-hidden', 'false')
+    document.body.style.overflow = 'hidden'
+}
+
+const closeCheckoutSummary = () => {
+    if (!checkoutSummaryOverlay) {
+        return
+    }
+
+    checkoutSummaryOverlay.classList.remove('is-active')
+    checkoutSummaryOverlay.setAttribute('aria-hidden', 'true')
+    document.body.style.overflow = ''
+}
+
+if (checkoutConfirmButton) {
+    checkoutConfirmButton.addEventListener('click', event => {
+        event.preventDefault()
+        event.stopImmediatePropagation()
+
+        if (validateCheckoutForm()) {
+            openCheckoutSummary()
+        }
+    })
+}
+
+requiredCheckoutFields.forEach(field => {
+    if (field.input) {
+        field.input.addEventListener('input', () => setCheckoutFieldError(field.input, field.message, false))
+    }
+})
+
+if (checkoutSummaryClose) {
+    checkoutSummaryClose.addEventListener('click', closeCheckoutSummary)
+}
+
+if (checkoutSummaryOverlay) {
+    checkoutSummaryOverlay.addEventListener('click', event => {
+        if (event.target === checkoutSummaryOverlay) {
+            closeCheckoutSummary()
+        }
+    })
+}
+
+if (checkoutSummarySubmit) {
+    checkoutSummarySubmit.addEventListener('click', () => {
+        closeCheckoutSummary()
+        alert('Спасибо! Ваш заказ принят в обработку.')
+    })
+}
+
+document.addEventListener('keydown', event => {
+    if (event.key === 'Escape') {
+        closeCheckoutSummary()
+    }
+})
