@@ -140,7 +140,16 @@
 			}
 
 			function getCalcProduct(productName) {
-				var normalizedName = normalizeCalcTitle(productName);
+				var titleAliases = {
+					'маклор': 'Маклор',
+					'антойл': 'Антойл+',
+					'антойлс': 'Антойл+'
+				};
+				var normalizedName = normalizeCalcTitle(productName).replace(/ё/g, 'е').replace(/[^а-яa-z0-9+]/gi, '');
+				if (titleAliases[normalizedName]) {
+					productName = titleAliases[normalizedName];
+				}
+				normalizedName = normalizeCalcTitle(productName);
 				var exactProduct = productsForCalc.find(function (product) {
 					return normalizeCalcTitle(product.title) === normalizedName;
 				});
@@ -318,13 +327,13 @@
 
 			submitButton.addEventListener('click', calculateProductAmount);
 
-			document.querySelectorAll('.prod-yur-calc-box .btn').forEach(function (button) {
+			document.querySelectorAll('.prod-yur-calc-box .btn, .fiz-calc-box .btn').forEach(function (button) {
 				button.classList.add('yur-calc-open');
 				button.setAttribute('type', 'button');
 				button.addEventListener('click', function (event) {
 					event.preventDefault();
-					var card = button.closest('.prod-yur-item');
-					var productTitle = card ? card.querySelector('.prod-yur-descr-box h5') : null;
+					var card = button.closest('.prod-yur-item, .fiz-product-card, .single-fiz-product');
+					var productTitle = card ? card.querySelector('.prod-yur-descr-box h5, .fiz-prod-title a, .my-title') : null;
 					var pageTitle = document.querySelector('.my-title, .s-header-title h1, h1');
 					var resolvedTitle = productTitle || pageTitle;
 					openCalculator(resolvedTitle ? resolvedTitle.textContent.trim() : '');

@@ -54,6 +54,10 @@
 						<a href="#" class="btn btn-wishlist"><span>В корзину</span></a>
 					</div>
 
+					<div class="fiz-calc-box single-fiz-calc-box">
+						<button type="button" class="btn btn-form fiz-calc-open"><span>Калькулятор расхода</span></button>
+					</div>
+
 				</div>
 				
 			</div>
