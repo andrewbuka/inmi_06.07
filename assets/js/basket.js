@@ -63,12 +63,12 @@ const setBasket = (products) => {
         const ProdBox = DomHelper.createCountProdBox([preProdBox])
 
         // price
-        const price = DomHelper.createPrice(`${prod.price} руб.`)
+        const price = DomHelper.createPrice(`${prod.price} BYN`)
         const priceBox = DomHelper.createPriceBox([price])
 
         // total
         const totalSum = +prod.price*+prod.count
-        const total = DomHelper.createTotal(`${totalSum} руб.`)
+        const total = DomHelper.createTotal(`${totalSum} BYN`)
 
 
 
@@ -399,7 +399,7 @@ const renderCheckoutSummary = data => {
     const products = data.products.map(product => `
         <li>
             <span>${escapeCheckoutHtml(product.title)} × ${escapeCheckoutHtml(product.count)}</span>
-            <strong>${escapeCheckoutHtml(+product.price * +product.count)} руб.</strong>
+            <strong>${escapeCheckoutHtml(+product.price * +product.count)} BYN</strong>
         </li>
     `).join('')
 
@@ -424,7 +424,7 @@ const renderCheckoutSummary = data => {
         <div class="checkout-summary-section">
             <h4>Товары</h4>
             <ul class="checkout-summary-products">${products}</ul>
-            <div class="checkout-summary-total"><span>Всего</span><strong>${escapeCheckoutHtml(data.total)} руб.</strong></div>
+            <div class="checkout-summary-total"><span>Всего</span><strong>${escapeCheckoutHtml(data.total)} BYN</strong></div>
         </div>
     `
 }
