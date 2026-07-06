@@ -187,14 +187,14 @@
                                                     <input type="hidden" name="shipping_method_current" value="revship.revship">
                                         <input type="hidden" name="shipping_method_checked" value="">
                                                         </div>
-                            </div><div class="simplecheckout-left-column"><div class="simplecheckout-block" id="simplecheckout_shipping_address">
+                            </div><div class="simplecheckout-left-column"><div class="simplecheckout-block none" id="simplecheckout_shipping_address">
                                 <div class="checkout-heading panel-heading">Адрес доставки</div>
                                 <div class="simplecheckout-block-content">
                                     <fieldset class="form-horizontal">
                                     <div class="form-group required row-shipping_address_address_1">
                                 <label class="control-label col-sm-4" for="shipping_address_address_1">Адрес</label>
                                 <div class="col-sm-8">
-                                        <input class="form-control" type="text" name="shipping_address[address_1]" id="shipping_address_address_1" value="" placeholder="">
+                                        <input class="form-control" type="text" name="shipping_address[address_1]" id="shipping_address_address_1" value="" placeholder="" autocomplete="street-address">
                                                 <div class="simplecheckout-rule-group" data-for="shipping_address_address_1">
                                                 <div style="display:none;" data-for="shipping_address_address_1" data-for-type="text" data-rule="byLength" class="simplecheckout-error-text simplecheckout-rule" data-length-min="3" data-length-max="128" data-required="true">Адрес должен быть от 3 до 128 символов!</div>
                                             </div>
