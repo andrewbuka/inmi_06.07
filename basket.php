@@ -264,6 +264,16 @@
                             </div>
         </div>
 
+        <div class="checkout-summary-overlay" id="checkout_summary_overlay" aria-hidden="true">
+            <div class="checkout-summary-panel" role="dialog" aria-modal="true" aria-labelledby="checkout_summary_title">
+                <button class="checkout-summary-panel__close" type="button" id="checkout_summary_close" aria-label="Закрыть окно">×</button>
+                <p class="checkout-summary-panel__eyebrow">Проверьте данные</p>
+                <h3 class="checkout-summary-panel__title" id="checkout_summary_title">Подтверждение заказа</h3>
+                <div class="checkout-summary-panel__content" id="checkout_summary_content"></div>
+                <button class="checkout-summary-panel__submit" type="button" id="checkout_summary_submit">Заказать</button>
+            </div>
+        </div>
+
 
 
 <!-- 
