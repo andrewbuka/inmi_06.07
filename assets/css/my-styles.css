@@ -71,7 +71,7 @@
     border-radius: 0;
     font-size: 16px;
     letter-spacing: 0.1em;
-    font-family: "Roboto Condensed", sans-serif;
+    font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
     overflow: hidden;
     position: relative;
 }
@@ -994,7 +994,7 @@
 .main-slide-benefits .benefit-number {
     margin-right: 12px;
     color: #246e49;
-    font-family: "Roboto Condensed", sans-serif;
+    font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
     font-size: 28px;
     font-weight: 700;
     line-height: 1;

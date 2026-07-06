@@ -1870,7 +1870,7 @@ blockquote:before{
 	margin-bottom: 22px;
 	border-bottom: 1px solid #dfdfdf;
 	font-weight: 700;
-	font-family: "Roboto Condensed", sans-serif;
+	font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
 	font-size: 16px;
 	letter-spacing: 0.1em;
 }
@@ -3438,7 +3438,7 @@ body.modal {
 					font-weight: 600;
 					border: none;
 					background-color: transparent;
-					font-family: "Josefin Sans",sans-serif;
+					font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
 					text-align: center;
 					&:before{
 						content: '0';
